@@ -6,7 +6,8 @@ const Productos = () => {
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:3001/api/productos')
+    //'http://localhost:3001/api/productos')
+    axios.get(`${process.env.REACT_APP_API_URL}/api/productos`)
       .then(response => {
         setProductos(response.data);
       })
