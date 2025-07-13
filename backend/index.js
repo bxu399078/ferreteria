@@ -10,8 +10,10 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+//console.log(process.env.DATABASE_URl)
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URl,
+  connectionString: DATABASE_URl,
   ssl:{
     rejectUnauthorized: false
   }
