@@ -13,7 +13,7 @@ app.use(express.json());
 //console.log(process.env.DATABASE_URl)
 
 const pool = new Pool({
-  connectionString: DATABASE_URl,
+  connectionString: process.env.DATABASE_URl,
   ssl:{
     rejectUnauthorized: false
   }
