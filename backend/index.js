@@ -48,6 +48,27 @@ app.get('/api/productos', async (req, res) => {
   }
 });
 
+app.get('/api/clientes/:id', async (req, res) => {
+   try {
+     const { id } = req.params; // Obtenemos el ID de la URL
+     const resultado = await pool.query('SELECT * FROM cliente WHERE id = $1', [id]);
+ 
+     // Si no encontramos un cliente con ese ID, devolvemos un error 404
+     if (resultado.rows.length === 0) {
+       return res.status(404).json({ message: 'Cliente no encontrado' });
+     }
+ 
+     // Si lo encontramos, devolvemos el primer (y único) resultado
+     res.json(resultado.rows[0]);
+ 
+   } catch (error) {
+     console.error('Error al consultar cliente por ID:', error);
+     res.status(500).send('Error interno del servidor');
+   }
+ });
+
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
