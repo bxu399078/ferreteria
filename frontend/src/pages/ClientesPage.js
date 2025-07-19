@@ -1,10 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Button, Modal } from 'react-bootstrap';
+
 
 const ClientesPage = () => {
   const [clientes, setClientes] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+   
+      // Función para cerrar el modal
+  const handleCloseModal = () => setShowModal(false);
+
 
   useEffect(() => {
     //axios.get('http://localhost:3001/api/clientes')
@@ -25,10 +32,12 @@ const ClientesPage = () => {
            }
            const data = await response.json();
            setClienteSeleccionado(data); // Guardamos el cliente en nuestro nuevo estado
-         } catch (error) {
+           setShowModal(true);
+          } catch (error) {
            console.error("Error al buscar cliente:", error);
            setClienteSeleccionado({ nombre: 'No encontrado' }); // Manejo de error
-         }
+           setShowModal(true); 
+          }
        };
  
 
@@ -39,18 +48,39 @@ const ClientesPage = () => {
       <div>
              {/* Por ahora, le pedimos el cliente con ID=1. ¡Puedes cambiarlo! */}
              <button onClick={() => obtenerClientePorId(1)}>
-              Obtener Nombre del Cliente 1
+              Clientazo
              </button>
              {/* Mostramos el nombre del cliente solo si existe en nuestro estado */}
-             {clienteSeleccionado && (
+             {/* {clienteSeleccionado && (
                <p style={{ fontWeight: 'bold', marginTop: '10px' }}>
                  Cliente seleccionado: {clienteSeleccionado.nombre}
                </p>
-             )}
+             )} */}
       </div>
         {clientes.map(cliente => (
           <li key={cliente.id}>{cliente.nombre}</li>
         ))}
+
+      {clienteSeleccionado && (
+            <Modal show={showModal} onHide={handleCloseModal}>
+              <Modal.Header closeButton>
+                <Modal.Title>Detalles del Cliente</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <p><strong>ID:</strong> {clienteSeleccionado.id}</p>
+                <p><strong>Nombre:</strong> {clienteSeleccionado.nombre}</p>
+                <p><strong>Email:</strong> {clienteSeleccionado.email}</p>
+                <p><strong>Teléfono:</strong> {clienteSeleccionado.telefono}</p>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseModal}>
+                  Cerrar
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          )}
+
+
       </ul>
     </div>
     
