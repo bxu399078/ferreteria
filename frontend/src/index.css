@@ -1,11 +1,25 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+    margin: 0;
+   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+       sans-serif;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+  
+   /* --- INICIO DE NUESTROS CAMBIOS --- */
+  
+    /* El degradado de verde oscuro a claro */
+    background: linear-gradient(to bottom, #2E7D32, #A5D6A7);
+  
+    /* Aseguramos que el degradado siempre cubra toda la pantalla */
+    min-height: 100vh;
+  
+    /* Cambiamos el color del texto a blanco para que sea legible sobre el fondo oscuro */
+    color: white;
+  
+    /* --- FIN DE NUESTROS CAMBIOS --- */
+  }
+
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
