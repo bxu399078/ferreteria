@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Modal, Card } from 'react-bootstrap';
+import { Button, Modal, Card, Form } from 'react-bootstrap';
 
 
 const ClientesPage = () => {
@@ -9,8 +9,51 @@ const ClientesPage = () => {
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [showModal, setShowModal] = useState(false);
    
+
       // Función para cerrar el modal
   const handleCloseModal = () => setShowModal(false);
+
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+ 
+   // --- 2. NUEVOS ESTADOS PARA EL MODAL DE "AGREGAR CLIENTE" ---
+   const [showAddModal, setShowAddModal] = useState(false);
+   const [newClient, setNewClient] = useState({ nombre: ''});
+ 
+   // --- 3. FUNCIONES PARA MANEJAR EL MODAL DE "AGREGAR CLIENTE" ---
+   const handleCloseAddModal = () => {
+     setShowAddModal(false);
+     setNewClient({ nombre: '', email: '', telefono: '' }); // Reseteamos el formulario
+   };
+   const handleShowAddModal = () => setShowAddModal(true);
+ 
+   const handleInputChange = (e) => {
+     const { name, value } = e.target;
+     setNewClient({ ...newClient, [name]: value });
+  };
+
+   const handleFormSubmit = async (e) => {
+     e.preventDefault(); // Prevenimos que la página se recargue
+     try {
+       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/clientes`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(newClient),
+       });
+ 
+       if (!response.ok) {
+         throw new Error('Error al crear el cliente');
+       }
+ 
+       const addedClient = await response.json();
+       // Actualizamos la lista de clientes en la página SIN recargar
+       setClientes([...clientes, addedClient]);
+       handleCloseAddModal(); // Cerramos el modal
+ 
+     } catch (error) {
+       console.error("Error en el formulario:", error);
+       // Aquí podrías mostrar un mensaje de error al usuario
+     }
+   };
 
 
   useEffect(() => {
@@ -98,6 +141,35 @@ const ClientesPage = () => {
              </Card.Body>
            </Card>
           {/* --- FIN DE LA NUEVA TARJETA --- */}
+          {/* --- 4. BOTÓN PARA ABRIR EL MODAL DE "AGREGAR CLIENTE" --- */}
+           <Button variant="primary" onClick={handleShowAddModal} className="mb-3">
+             + Agregar Nuevo Cliente
+           </Button>
+           <Modal show={showAddModal} onHide={handleCloseAddModal}>
+             <Modal.Header closeButton>
+               <Modal.Title>Agregar Nuevo Cliente</Modal.Title>
+             </Modal.Header>
+             <Modal.Body>
+               <Form onSubmit={handleFormSubmit}>
+                 <Form.Group className="mb-3">
+                   <Form.Label>Nombre</Form.Label>
+                   <Form.Control
+                     type="text"
+                     name="nombre"
+                     value={newClient.nombre}
+                     onChange={handleInputChange}
+                     required
+                  />
+                 </Form.Group>
+                 <Button variant="secondary" onClick={handleCloseAddModal} className="me-2">
+                  Cancelar
+                </Button>
+                <Button variant="primary" type="submit">
+                  Guardar Cliente
+             </Button>
+              </Form>
+            </Modal.Body>
+          </Modal>
 
 
     </div>

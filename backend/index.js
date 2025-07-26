@@ -22,16 +22,16 @@ const pool = new Pool({
     rejectUnauthorized: false
   }
 });
- 
+  
 
-/*   const pool = new Pool({
+ /*   const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
-}); */ 
- 
+});  
+ */ 
 
 app.get('/api/clientes', async (req, res) => {
   try {
@@ -53,8 +53,39 @@ app.get('/api/productos', async (req, res) => {
   }
 });
 
+app.post('/api/clientes', async (req, res) => {
+  console.log(req.body);
+  try {
+    // 1. Obtenemos los datos del cuerpo (body) de la petición
+    const { nombre } = req.body;
 
-app.get('/api/clientes/reporte', async (req, res) => {
+    // 2. Validación básica para asegurarnos de que tenemos los datos necesarios
+    if (!nombre) {
+      return res.status(400).json({ message: 'El nombre y el email son obligatorios.' });
+    }
+
+    // 3. Insertamos el nuevo cliente en la base de datos y usamos
+    //    'RETURNING *' para que nos devuelva el objeto completo que se acaba de crear.
+    const nuevoCliente = await pool.query(
+      'INSERT INTO cliente (nombre) VALUES ($1) RETURNING *',
+      [nombre]
+    );
+
+    // 4. Respondemos con un código 201 (Creado) y el objeto del nuevo cliente.
+    res.status(201).json(nuevoCliente.rows[0]);
+
+  } catch (error) {
+    console.error('Error al crear el cliente:', error);
+    // Manejo de errores comunes, como un email duplicado
+    if (error.code === '23505') { // Código de error de PostgreSQL para 'unique_violation'
+      return res.status(409).json({ message: 'El email ya está registrado.' });
+    }
+   res.status(500).send('Error interno al crear el cliente');
+  }
+});
+
+
+app.get('/api/reporte', async (req, res) => {
      try {
        // 1. Obtenemos todos los clientes de la base de datos
        const { rows: clientes } = await pool.query('SELECT * FROM cliente ORDER BY nombre ASC');
@@ -96,6 +127,51 @@ app.get('/api/clientes/reporte', async (req, res) => {
        res.status(500).send('Error interno al generar el reporte');
      }
   });
+
+
+  app.get('/api/reporteProducto', async (req, res) => {
+    try {
+      // 1. Obtenemos todos los clientes de la base de datos
+      const { rows: clientes } = await pool.query('SELECT * FROM cliente ORDER BY nombre ASC');
+  
+      // 2. Creamos un nuevo documento PDF en memoria
+      const doc = new PDFDocument({ margin: 50 });
+  
+      // 3. Configuramos las cabeceras de la respuesta para que el navegador
+      //    sepa que está descargando un archivo PDF.
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=reporte-clientes.pdf');
+  
+      // 4. "Conectamos" el documento PDF a la respuesta. Todo lo que escribamos
+      //    en el 'doc' se enviará al navegador.
+      doc.pipe(res);
+  
+      // 5. Empezamos a construir el PDF
+      // Cabecera del documento
+      doc.fontSize(18).text('Reporte de Clientetazos', { align: 'center' });
+      doc.moveDown();
+  
+      // Línea de separación
+      doc.strokeColor('#aaaaaa').lineWidth(1).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+      doc.moveDown();
+  
+      // Contenido - Iteramos sobre cada cliente
+      clientes.forEach(cliente => {
+        doc.fontSize(12).text(`ID: ${cliente.id}`, { continued: true });
+        doc.text(` - Nombre: ${cliente.nombre}`, { align: 'left' });
+        doc.fontSize(10).fillColor('gray').text(`Email: ${cliente.email} | Teléfono: ${cliente.telefono}`);
+        doc.moveDown(0.5);
+      });
+  
+      // 6. Finalizamos el documento. Esto es muy importante.
+      doc.end();
+  
+    } catch (error) {
+      console.error('Error al generar el reporte PDF:', error);
+      res.status(500).send('Error interno al generar el reporte');
+    }
+ });
+
 
   app.get('/api/clientes/:id', async (req, res) => {
     try {
