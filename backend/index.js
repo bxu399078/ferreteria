@@ -16,7 +16,7 @@ app.use(express.json());
 
 //console.log(process.env.DATABASE_URl)
 
-const pool = new Pool({
+ const pool = new Pool({
   connectionString: process.env.DATABASE_URl,
   ssl:{
     rejectUnauthorized: false
@@ -24,14 +24,14 @@ const pool = new Pool({
 });
   
 
- /*   const pool = new Pool({
+/*     const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
-});  
- */ 
+}); */  
+  
 
 app.get('/api/clientes', async (req, res) => {
   try {
@@ -129,10 +129,10 @@ app.get('/api/reporte', async (req, res) => {
   });
 
 
-  app.get('/api/reporteProducto', async (req, res) => {
+  app.get('/api/reporteproducto', async (req, res) => {
     try {
       // 1. Obtenemos todos los clientes de la base de datos
-      const { rows: clientes } = await pool.query('SELECT * FROM cliente ORDER BY nombre ASC');
+      const { rows: productos } = await pool.query('SELECT * FROM productos ORDER BY nombre ASC');
   
       // 2. Creamos un nuevo documento PDF en memoria
       const doc = new PDFDocument({ margin: 50 });
@@ -140,7 +140,7 @@ app.get('/api/reporte', async (req, res) => {
       // 3. Configuramos las cabeceras de la respuesta para que el navegador
       //    sepa que está descargando un archivo PDF.
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename=reporte-clientes.pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=reporte-productos.pdf');
   
       // 4. "Conectamos" el documento PDF a la respuesta. Todo lo que escribamos
       //    en el 'doc' se enviará al navegador.
@@ -148,7 +148,7 @@ app.get('/api/reporte', async (req, res) => {
   
       // 5. Empezamos a construir el PDF
       // Cabecera del documento
-      doc.fontSize(18).text('Reporte de Clientetazos', { align: 'center' });
+      doc.fontSize(18).text('Reporte de Productasos', { align: 'center' });
       doc.moveDown();
   
       // Línea de separación
@@ -156,10 +156,10 @@ app.get('/api/reporte', async (req, res) => {
       doc.moveDown();
   
       // Contenido - Iteramos sobre cada cliente
-      clientes.forEach(cliente => {
-        doc.fontSize(12).text(`ID: ${cliente.id}`, { continued: true });
-        doc.text(` - Nombre: ${cliente.nombre}`, { align: 'left' });
-        doc.fontSize(10).fillColor('gray').text(`Email: ${cliente.email} | Teléfono: ${cliente.telefono}`);
+      productos.forEach(productos => {
+        doc.fontSize(12).text(`ID: ${productos.id}`, { continued: true });
+        doc.text(` - Nombre: ${productos.nombre}`, { align: 'left' });
+        //doc.fontSize(10).fillColor('gray').text(`Email: ${cliente.email} | Teléfono: ${cliente.telefono}`);
         doc.moveDown(0.5);
       });
   
