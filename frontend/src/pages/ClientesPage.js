@@ -131,7 +131,7 @@ const ClientesPage = () => {
            <Card.Title>Reportes</Card.Title>
             <Button
                as="a" // Le decimos que se comporte como un enlace
-               href={`${process.env.REACT_APP_API_URL}/api/clientes/reporte`}
+               href={`${process.env.REACT_APP_API_URL}/api/reporte`}
                  target="_blank" // Opcional: abre la descarga en una nueva pestaña
                  rel="noopener noreferrer"
                  variant="success"
