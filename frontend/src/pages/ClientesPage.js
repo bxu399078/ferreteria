@@ -22,7 +22,7 @@ const ClientesPage = () => {
    // --- 3. FUNCIONES PARA MANEJAR EL MODAL DE "AGREGAR CLIENTE" ---
    const handleCloseAddModal = () => {
      setShowAddModal(false);
-     setNewClient({ nombre: '', email: '', telefono: '' }); // Reseteamos el formulario
+     setNewClient({ nombre: '' }); // Reseteamos el formulario
    };
    const handleShowAddModal = () => setShowAddModal(true);
  
