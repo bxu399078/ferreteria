@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Modal } from 'react-bootstrap';
+import { Button, Modal, Card } from 'react-bootstrap';
 
 
 const ClientesPage = () => {
@@ -82,6 +82,24 @@ const ClientesPage = () => {
 
 
       </ul>
+          {/* --- NUEVA TARJETA PARA REPORTES --- */}
+       <Card className="my-3 card-transparent">
+        <Card.Body>
+           <Card.Title>Reportes</Card.Title>
+            <Button
+               as="a" // Le decimos que se comporte como un enlace
+               href={`${process.env.REACT_APP_API_URL}/api/clientes/reporte`}
+                 target="_blank" // Opcional: abre la descarga en una nueva pestaña
+                 rel="noopener noreferrer"
+                 variant="success"
+               >
+                 Descargar Informe de Clientes (PDF)
+               </Button>
+             </Card.Body>
+           </Card>
+          {/* --- FIN DE LA NUEVA TARJETA --- */}
+
+
     </div>
     
  
