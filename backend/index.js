@@ -16,7 +16,7 @@ app.use(express.json());
 
 //console.log(process.env.DATABASE_URl)
 
- const pool = new Pool({
+const pool = new Pool({
   connectionString: process.env.DATABASE_URl,
   ssl:{
     rejectUnauthorized: false
@@ -24,13 +24,13 @@ app.use(express.json());
 });
   
 
-/*     const pool = new Pool({
+  /* const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
-}); */  
+}); */   
   
 
 app.get('/api/clientes', async (req, res) => {
@@ -81,6 +81,37 @@ app.post('/api/clientes', async (req, res) => {
       return res.status(409).json({ message: 'El email ya está registrado.' });
     }
    res.status(500).send('Error interno al crear el cliente');
+  }
+});
+
+app.post('/api/productos', async (req, res) => {
+  console.log(req.body);
+  try {
+    // 1. Obtenemos los datos del cuerpo (body) de la petición
+    const { nombre } = req.body;
+
+    // 2. Validación básica para asegurarnos de que tenemos los datos necesarios
+    if (!nombre) {
+      return res.status(400).json({ message: 'El producto es obligatorio' });
+    }
+
+    // 3. Insertamos el nuevo cliente en la base de datos y usamos
+    //    'RETURNING *' para que nos devuelva el objeto completo que se acaba de crear.
+    const nuevoProducto = await pool.query(
+      'INSERT INTO productos (nombre) VALUES ($1) RETURNING *',
+      [nombre]
+    );
+
+    // 4. Respondemos con un código 201 (Creado) y el objeto del nuevo cliente.
+    res.status(201).json(nuevoProducto.rows[0]);
+
+  } catch (error) {
+    console.error('Error al crear el producto:', error);
+    // Manejo de errores comunes, como un email duplicado
+    if (error.code === '23505') { // Código de error de PostgreSQL para 'unique_violation'
+      return res.status(409).json({ message: 'El email ya está registrado.' });
+    }
+   res.status(500).send('Error interno al crear el producto');
   }
 });
 
