@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Modal, Card, Form } from 'react-bootstrap';
+import { Button, Modal, Card, Form, Alert } from 'react-bootstrap';
 
 
 const ClientesPage = () => {
@@ -9,6 +9,9 @@ const ClientesPage = () => {
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [showModal, setShowModal] = useState(false);
    
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productNameToDelete, setProductNameToDelete] = useState(''); // <-- CAMBIO: Guardamos el nombre a borrar
+  const [deleteError, setDeleteError] = useState(''); // <-- CAMBIO: Estado para el mensaje de error
 
       // Función para cerrar el modal
   const handleCloseModal = () => setShowModal(false);
@@ -55,6 +58,59 @@ const ClientesPage = () => {
      }
    };
 
+   const handleShowDeleteModal = () => setShowDeleteModal(true);
+     const handleCloseDeleteModal = () => {
+           console.log("cerrando modal de borrar clientes");
+           setShowDeleteModal(false);
+           setProductNameToDelete(''); // Limpiamos el nombre
+           setDeleteError(''); // Limpiamos el error
+          };
+    const handleDeleteInputChange = (e) => {
+           setProductNameToDelete(e.target.value);
+          };
+  
+          const handleDeleteSubmit = async (e) => {
+            e.preventDefault();
+            setDeleteError(''); // Reseteamos el error al intentar de nuevo
+            console.log("enviando formulario borrar");  
+             // 1. Buscar el producto en la lista local por nombre
+             if (!productNameToDelete.trim()) {
+                   setDeleteError("Por favor, escribe un nombre del cliente.");
+                   return;
+                }
+            
+                
+             // 3. Si se encuentra, proceder con el borrado usando su ID
+             try {
+              const response = await fetch(`${process.env.REACT_APP_API_URL}/api/clientesd`, { // <-- URL correcta
+                       method: 'POST', // <-- Método POST
+                       headers: {
+                         'Content-Type': 'application/json',
+                       },
+                       body: JSON.stringify({ nombre: productNameToDelete }), // <-- Enviamos el nombre en el cuerpo
+                     });
+             
+                     if (response.ok) {
+                      setClientes(
+                                 clientes.filter(p => p.nombre.toLowerCase() !== productNameToDelete.toLowerCase())
+                               );
+                               // 3. Y AHORA, cerramos el modal.
+                              handleCloseDeleteModal();
+                              console.log("listooo");
+                     }
+                     else{
+                        const errorData = await response.json();
+                      throw new Error(errorData.message || 'El cliente no pudo ser borrado.');
+                     }
+                
+                 
+                
+                } catch (error) {
+               console.error("Error al borrar:", error);
+               setDeleteError(error.message);
+             }
+           };
+          
 
   useEffect(() => {
     //axios.get('http://localhost:3001/api/clientes')
@@ -170,6 +226,41 @@ const ClientesPage = () => {
               </Form>
             </Modal.Body>
           </Modal>
+          <Button variant="danger" onClick={handleShowDeleteModal}>
+                 - Borrar Cliente por Nombre
+          </Button>  
+          <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
+            <Form onSubmit={handleDeleteSubmit}>
+            <Modal.Header closeButton>
+             <Modal.Title>Borrar Cliente por Nombre</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              
+                {/* Mostramos un mensaje de error si existe */}
+                {deleteError && <Alert variant="danger">{deleteError}</Alert>}
+    
+                <Form.Group className="mb-3">
+                  <Form.Label>Escribe el nombre exacto del producto a borrar</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Ej:a"
+                    value={productNameToDelete}
+                    onChange={handleDeleteInputChange}
+                    required
+                  />
+                </Form.Group>
+              </Modal.Body>
+              <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseDeleteModal} type="button">
+                    Cancelar
+                  </Button>
+                  <Button variant="danger" type="submit">
+                    Buscar y Borrar
+                  </Button>
+              </Modal.Footer>  
+             </Form>
+            
+         </Modal>
 
 
     </div>

@@ -16,21 +16,21 @@ app.use(express.json());
 
 //console.log(process.env.DATABASE_URl)
 
-const pool = new Pool({
+/* const pool = new Pool({
   connectionString: process.env.DATABASE_URl,
   ssl:{
     rejectUnauthorized: false
   }
-});
+}); */
   
 
-  /* const pool = new Pool({
+ const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
-}); */   
+}); 
   
 
 app.get('/api/clientes', async (req, res) => {
@@ -97,10 +97,15 @@ app.post('/api/productos', async (req, res) => {
 
     // 3. Insertamos el nuevo cliente en la base de datos y usamos
     //    'RETURNING *' para que nos devuelva el objeto completo que se acaba de crear.
+    
+    
+    
     const nuevoProducto = await pool.query(
       'INSERT INTO productos (nombre) VALUES ($1) RETURNING *',
       [nombre]
     );
+
+    
 
     // 4. Respondemos con un código 201 (Creado) y el objeto del nuevo cliente.
     res.status(201).json(nuevoProducto.rows[0]);
@@ -114,6 +119,75 @@ app.post('/api/productos', async (req, res) => {
    res.status(500).send('Error interno al crear el producto');
   }
 });
+
+app.post('/api/clientesd', async (req, res) => {
+  console.log(req.body);
+  try {
+    // 1. Obtenemos los datos del cuerpo (body) de la petición
+    const { nombre } = req.body;
+
+    // 2. Validación básica para asegurarnos de que tenemos los datos necesarios
+    if (!nombre) {
+      return res.status(400).json({ message: 'El nombre es nesario.' });
+    }
+
+    // 3. Insertamos el nuevo cliente en la base de datos y usamos
+    //    'RETURNING *' para que nos devuelva el objeto completo que se acaba de crear.
+    const nuevoCliente = await pool.query(
+      'DELETE FROM cliente  WHERE nombre = $1 RETURNING *',
+      [nombre]
+    );
+
+    // 4. Respondemos con un código 201 (Creado) y el objeto del nuevo cliente.
+    res.status(201).json(nuevoCliente.rows[0]);
+
+  } catch (error) {
+    console.error('Error al borrar el cliente:', error);
+    // Manejo de errores comunes, como un email duplicado
+    if (error.code === '23505') { // Código de error de PostgreSQL para 'unique_violation'
+      return res.status(409).json({ message: 'El email ya está registrado.' });
+    }
+   res.status(500).send('Error interno al borrar el cliente');
+  }
+});
+
+app.post('/api/productosd', async (req, res) => {
+  console.log(req.body);
+  try {
+    // 1. Obtenemos los datos del cuerpo (body) de la petición
+    const { nombre } = req.body;
+
+    // 2. Validación básica para asegurarnos de que tenemos los datos necesarios
+    if (!nombre) {
+      return res.status(400).json({ message: 'El nombre es nesario.' });
+    }
+
+    const busqueda = await pool.query('SELECT * FROM productos WHERE nombre = $1', [nombre]);
+  
+    if (busqueda.rows.length === 0) {
+      return res.status(404).json({ message: 'no encontrado' });
+    }
+
+    // 3. Insertamos el nuevo cliente en la base de datos y usamos
+    //    'RETURNING *' para que nos devuelva el objeto completo que se acaba de crear.
+    const nuevoCliente = await pool.query(
+      'DELETE FROM productos  WHERE nombre = $1 RETURNING *',
+      [nombre]
+    );
+
+    // 4. Respondemos con un código 201 (Creado) y el objeto del nuevo cliente.
+    //res.status(201).json(nuevoCliente.rows[0]);
+
+  } catch (error) {
+    console.error('Error al borrar el producto:', error);
+    // Manejo de errores comunes, como un email duplicado
+    if (error.code === '23505') { // Código de error de PostgreSQL para 'unique_violation'
+      return res.status(409).json({ message: 'El email ya está registrado.' });
+    }
+   res.status(500).send('Error interno al borrar el producto');
+  }
+});
+
 
 
 app.get('/api/reporte', async (req, res) => {
@@ -222,7 +296,40 @@ app.get('/api/reporte', async (req, res) => {
       res.status(500).send('Error interno del servidor');
     }
   });
- 
+
+  app.post('/api/compras', async (req, res) => {
+       try {
+         // 1. Obtenemos los datos del cuerpo de la petición
+         const { cliente_id, producto_id, cantidad } = req.body;
+     
+         // 2. Validación de datos
+        if (!cliente_id || !producto_id || !cantidad) {
+          return res.status(400).json({ message: 'Faltan datos para registrar la compra.' });
+        }
+    
+        // 3. Insertamos la nueva compra en la base de datos
+        const nuevaCompra = await pool.query(
+          'INSERT INTO compras (cliente_id, producto_id, cantidad) VALUES ($1, $2, $3) RETURNING *',
+          [cliente_id, producto_id, cantidad]
+        );
+    
+        // Opcional pero recomendado: Podríamos también actualizar el stock del producto aquí.
+        // await pool.query('UPDATE producto SET stock = stock - $1 WHERE id = $2', [cantidad, producto_id]);
+    
+        // 4. Respondemos con éxito
+        res.status(201).json(nuevaCompra.rows[0]);
+    
+      } catch (error) {
+        console.error('Error al registrar la compra:', error);
+        // Manejo de errores, por ej. si un cliente_id o producto_id no existe (foreign key constraint)
+        if (error.code === '23503') {
+          return res.status(404).json({ message: 'El cliente o producto especificado no existe.' });
+        }
+        res.status(500).send('Error interno al registrar la compra');
+      }
+    });
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

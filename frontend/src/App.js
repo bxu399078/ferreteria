@@ -9,6 +9,7 @@ import AppNavbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import ClientesPage from './pages/ClientesPage';
 import ProductosPage from './pages/ProductosPage';
+import ComprasPage from './pages/ComprasPage';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
            <Route path="/" element={<HomePage />} />
            <Route path="/clientes" element={<ClientesPage />} />
            <Route path="/productos" element={<ProductosPage />} />
+           <Route path="/compras" element={<ComprasPage />} />
            {/* Cuando crees la página de productos, la añadirás aquí: */}
            {/* <Route path="/productos" element={<ProductosPage />} /> */}
           </Routes>

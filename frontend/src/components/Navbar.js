@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
          <Nav.Link as={Link} to="/">Inicio</Nav.Link>
          <Nav.Link as={Link} to="/clientes">Clientes</Nav.Link>
          <Nav.Link as={Link} to="/productos">Productos</Nav.Link>
+         <Nav.Link as={Link} to="/compras">Compras</Nav.Link>
              {/* Puedes añadir el enlace a productos aquí cuando crees la página */}
             {/* <Nav.Link as={Link} to="/productos">Productos</Nav.Link> */}
          </Nav>
