@@ -16,21 +16,21 @@ app.use(express.json());
 
 //console.log(process.env.DATABASE_URl)
 
-/*  const pool = new Pool({
+ const pool = new Pool({
   connectionString: process.env.DATABASE_URl,
   ssl:{
     rejectUnauthorized: false
   }
-}); */ 
+});  
   
-
+/* 
  const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
-}); 
+});  */
   
 
 app.get('/api/clientes', async (req, res) => {
